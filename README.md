@@ -29,12 +29,12 @@ Users should be able to:
 
 ### Screenshot
 
-![](./screenshot.jpg)
+![](./design/desktop-preview.jpg)
 
 ### Links
 
 - Solution URL: <https://github.com/SaoureT13/interactive-comments-section-main>
-- Live Site URL: [Add live site URL here](https://your-live-site-url.com)
+- Live Site URL: <https://saouret13.github.io/interactive-comments-section-main/>
 
 ## My process
 

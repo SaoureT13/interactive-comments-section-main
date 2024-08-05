@@ -3,6 +3,7 @@ import ListComment from "./ListComment";
 import { CurrentUserContext } from "../hooks/UserContext";
 import { useCommentsDispatch } from "../hooks/CommentsContext";
 import Comment from "./Comment";
+import DateComponent from "./DateComponent.jsx";
 
 function ActiveUserComment({ comment }) {
     const dispatch = useCommentsDispatch();
@@ -52,7 +53,7 @@ function ActiveUserComment({ comment }) {
         setContentError(false);
         setIsEditing((t) => !t);
     };
-    
+
     const handleDeleteComment = (commentId) => {
         dispatch({ type: "DELETE_COMMENT", commentId: commentId });
     };
@@ -137,7 +138,9 @@ function ActiveUserComment({ comment }) {
                         <span className="bg-Moderate_blue px-1 text-white font-medium text-[12px] rounded-sm">
                             you
                         </span>
-                        <p className="text-Grayish_Blue">{comment.createdAt}</p>
+                        <p className="text-Grayish_Blue">
+                            {<DateComponent date={comment.createdAt} />}
+                        </p>
                     </div>
                 </div>
                 <div className="grid-in-content text-Grayish_Blue">

@@ -85,7 +85,7 @@ function CommentForm({
                     </span>
                 )}
             </div>
-            <div className="flex flex-col gap-y-2 order-2 sm:order-3 absolute bottom-5 right-5 sm:static">
+            <div className="flex sm:flex-col gap-x-2  sm:gap-y-2 order-2 sm:order-3 absolute bottom-5 right-5 sm:static">
                 {button}
                 {commentReply && (
                     <button

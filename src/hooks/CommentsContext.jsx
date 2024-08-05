@@ -129,7 +129,7 @@ function reducer(state, action) {
                         {
                             id: count + 1,
                             content: content,
-                            createdAt: msg.toLocaleDateString(),
+                            createdAt: msg.toISOString(),
                             score: 0,
                             user: {
                                 image: {
@@ -163,7 +163,7 @@ function reducer(state, action) {
                 {
                     id: count + 1,
                     content: action.content,
-                    createdAt: msg.toLocaleDateString(),
+                    createdAt: msg.toISOString(),
                     score: 0,
                     user: {
                         image: {

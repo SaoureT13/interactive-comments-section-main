@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import { CurrentUserContext } from "../hooks/UserContext";
 import ActiveUserComment from "./ActiveUserComment";
 import CommentForm from "./CommentForm";
+import DateComponent from "./DateComponent.jsx";
 
 function Comment({ comment }) {
     const currentUser = useContext(CurrentUserContext);
@@ -68,7 +69,9 @@ function Comment({ comment }) {
                         <p className="text-Dark_blue font-medium">
                             {comment.user.username}
                         </p>
-                        <p className="text-Grayish_Blue">{comment.createdAt}</p>
+                        <p className="text-Grayish_Blue">
+                            {<DateComponent date={comment.createdAt} />}
+                        </p>
                     </div>
                 </div>
                 <div className="grid-in-content text-Grayish_Blue">
