@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .caret-Moderate_blue {
+        caret-color: hsl(238, 40%, 52%);
+    }
+
+    .caret-blue {
+        caret-color: blue;
+    }
+}
