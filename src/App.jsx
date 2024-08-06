@@ -41,6 +41,7 @@ function App() {
                                 username={comment.user.username}
                                 image={comment.user.image.png}
                                 replyingTo={comment.replyingTo}
+                                score={comment.score}
                             />
                         );
                     })}
