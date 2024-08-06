@@ -10,7 +10,6 @@ import ActiveUserComment from "./components/ActiveUserComment.jsx";
 
 function App() {
     const [currentUser, setCurrentUser] = useState(data.currentUser);
-
     const comments = useComments();
 
     return (

@@ -22,6 +22,7 @@ function CommentForm({
         });
         setContent("");
         setContentError(false);
+        onHandleToggleIsReplying()
     };
 
     function handleSetContent(e) {
