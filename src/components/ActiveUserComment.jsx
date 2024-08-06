@@ -1,18 +1,21 @@
-import { useState } from "react";
-import ListComment from "./ListComment";
-import { CurrentUserContext } from "../hooks/UserContext";
+import { memo, useState } from "react";
 import { useCommentsDispatch } from "../hooks/CommentsContext";
-import Comment from "./Comment";
 import DateComponent from "./DateComponent.jsx";
 
-function ActiveUserComment({ comment }) {
+const ActiveUserComment = memo(function ActiveUserComment({
+    id,
+    content,
+    createdAt,
+    username,
+    image,
+    replyingTo,
+    score,
+}) {
     const dispatch = useCommentsDispatch();
     const [isEditing, setIsEditing] = useState(false);
     const [contentError, setContentError] = useState(false);
-    const [content, setContent] = useState(
-        comment.replyingTo
-            ? `@${comment.replyingTo} ${comment.content}`
-            : comment.content
+    const [text, setText] = useState(
+        replyingTo ? `@${replyingTo} ${content}` : content
     );
 
     const handleIncrementScore = (commentId) => {
@@ -24,11 +27,11 @@ function ActiveUserComment({ comment }) {
     };
 
     const handleUpdateComment = (commentId) => {
-        if (content == false) {
+        if (text == false) {
             setContentError(true);
             return;
         }
-        let newContent = content.trim().split(" ");
+        let newContent = text.trim().split(" ");
         if (newContent.length == 1 && newContent[0].includes("@")) {
             setContentError(true);
             return;
@@ -45,11 +48,7 @@ function ActiveUserComment({ comment }) {
             newContent: newContent,
         });
 
-        setContent(
-            comment.replyingTo
-                ? `@${comment.replyingTo} ${newContent}`
-                : newContent
-        );
+        setText(replyingTo ? `@${replyingTo} ${newContent}` : newContent);
         setContentError(false);
         setIsEditing((t) => !t);
     };
@@ -57,26 +56,6 @@ function ActiveUserComment({ comment }) {
     const handleDeleteComment = (commentId) => {
         dispatch({ type: "DELETE_COMMENT", commentId: commentId });
     };
-
-    let replies;
-    if (comment.replies) {
-        replies = (
-            <ListComment replies={true}>
-                {comment.replies.map((comment) => {
-                    return <Comment key={comment.id} comment={comment} />;
-                })}
-            </ListComment>
-        );
-    }
-
-    let replyingTo;
-    if (comment.replyingTo) {
-        replyingTo = (
-            <span className="text-Moderate_blue font-medium">
-                @{comment.replyingTo}
-            </span>
-        );
-    }
 
     let component;
     if (isEditing) {
@@ -89,8 +68,8 @@ function ActiveUserComment({ comment }) {
                             ? "border-red-400 focus:border-red-400"
                             : ""
                     }`}
-                    onChange={(e) => setContent(e.target.value)}
-                    value={content}
+                    onChange={(e) => setText(e.target.value)}
+                    value={text}
                 ></textarea>
                 {contentError && (
                     <span className="text-sm text-red-500">
@@ -100,7 +79,7 @@ function ActiveUserComment({ comment }) {
                 <div className="flex mt-4">
                     <button
                         onClick={() => {
-                            handleUpdateComment(comment.id);
+                            handleUpdateComment(id);
                         }}
                         className="ml-auto bg-Moderate_blue text-white font-medium px-7 py-3 rounded-lg hover:bg-Light_grayish_blue transition duration-300 ease-in-out "
                     >
@@ -112,7 +91,12 @@ function ActiveUserComment({ comment }) {
     } else {
         component = (
             <p>
-                {replyingTo} {comment.content}
+                {replyingTo && (
+                    <span className="text-Moderate_blue font-medium">
+                        @{replyingTo}
+                    </span>
+                )}{" "}
+                {content}
             </p>
         );
     }
@@ -120,26 +104,20 @@ function ActiveUserComment({ comment }) {
     return (
         <li className="w-full list-none">
             <div
-                id={`comment-${comment.id}`}
+                id={`comment-${id}`}
                 className="w-full bg-white p-5 rounded-md grid grid-areas-layout sm:grid-cols-layout gap-x-4 gap-y-4 sm:grid-areas-sm_layout"
             >
                 <div className="grid-in-user flex items-center gap-3">
                     <span className="w-[40px] h-[40px] flex-shrink-0">
-                        <img
-                            src={comment.user.image.png}
-                            alt={comment.user.username}
-                            className="w-full"
-                        />
+                        <img src={image} alt={username} className="w-full" />
                     </span>
                     <div className="flex gap-x-3 items-center flex-wrap">
-                        <p className="text-Dark_blue font-medium">
-                            {comment.user.username}
-                        </p>
+                        <p className="text-Dark_blue font-medium">{username}</p>
                         <span className="bg-Moderate_blue px-1 text-white font-medium text-[12px] rounded-sm">
                             you
                         </span>
                         <p className="text-Grayish_Blue">
-                            {<DateComponent date={comment.createdAt} />}
+                            {<DateComponent date={createdAt} />}
                         </p>
                     </div>
                 </div>
@@ -149,7 +127,7 @@ function ActiveUserComment({ comment }) {
                 <div className="grid-in-reply flex justify-end">
                     <div className="flex gap-4 items-center">
                         <button
-                            onClick={() => handleDeleteComment(comment.id)}
+                            onClick={() => handleDeleteComment(id)}
                             className="group flex items-center gap-2 text-Soft_Red hover:text-Pale_red font-medium transition duration-150 ease-in-out"
                         >
                             <svg
@@ -181,7 +159,7 @@ function ActiveUserComment({ comment }) {
                 <div className="grid-in-react w-full sm:w-auto text-Moderate_blue font-medium">
                     <div className="flex sm:flex-col items-center justify-between py-2 sm:h-[90px] bg-Very_light_gray rounded-lg">
                         <button
-                            onClick={() => handleIncrementScore(comment.id)}
+                            onClick={() => handleIncrementScore(id)}
                             className="plus px-3 mr-2 sm:m-0 text-Light_grayish_blue hover:text-Moderate_blue"
                         >
                             <svg
@@ -194,9 +172,9 @@ function ActiveUserComment({ comment }) {
                                 <path d="M6.33 10.896c.137 0 .255-.05.354-.149.1-.1.149-.217.149-.354V7.004h3.315c.136 0 .254-.05.354-.149.099-.1.148-.217.148-.354V5.272a.483.483 0 0 0-.148-.354.483.483 0 0 0-.354-.149H6.833V1.4a.483.483 0 0 0-.149-.354.483.483 0 0 0-.354-.149H4.915a.483.483 0 0 0-.354.149c-.1.1-.149.217-.149.354v3.37H1.08a.483.483 0 0 0-.354.15c-.1.099-.149.217-.149.353v1.23c0 .136.05.254.149.353.1.1.217.149.354.149h3.333v3.39c0 .136.05.254.15.353.098.1.216.149.353.149H6.33Z" />
                             </svg>
                         </button>
-                        {comment.score}
+                        {score}
                         <button
-                            onClick={() => handleDecrementScore(comment.id)}
+                            onClick={() => handleDecrementScore(id)}
                             className="minus px-3 ml-2 sm:m-0 text-Light_grayish_blue hover:text-Moderate_blue"
                         >
                             <svg
@@ -212,9 +190,9 @@ function ActiveUserComment({ comment }) {
                     </div>
                 </div>
             </div>
-            {replies}
+            {/* {replies} */}
         </li>
     );
-}
+});
 
 export default ActiveUserComment;

@@ -1,15 +1,26 @@
+import { memo, useEffect } from "react";
 import ListComment from "./ListComment";
-import { useCommentsDispatch } from "../hooks/CommentsContext";
+import { useComments, useCommentsDispatch } from "../hooks/CommentsContext";
 import { useContext, useState } from "react";
 import { CurrentUserContext } from "../hooks/UserContext";
 import ActiveUserComment from "./ActiveUserComment";
 import CommentForm from "./CommentForm";
 import DateComponent from "./DateComponent.jsx";
 
-function Comment({ comment }) {
+const Comment = memo(function Comment({
+    id,
+    content,
+    createdAt,
+    username,
+    image,
+    replyingTo,
+    score,
+}) {
     const currentUser = useContext(CurrentUserContext);
+    const comments = useComments();
     const dispatch = useCommentsDispatch();
     const [isReplying, setIsReplying] = useState(false);
+    const [repliess, setRepliess] = useState(getRepliesObject(comments));
 
     const handleIncrementScore = (commentId) => {
         dispatch({ type: "IMCREMENT_COMMENT_SCORE", commentId: commentId });
@@ -19,64 +30,83 @@ function Comment({ comment }) {
         dispatch({ type: "DECREMENT_COMMENT_SCORE", commentId: commentId });
     };
 
+    function getRepliesObject(comments) {
+        return comments.flatMap((comment) => {
+            if (comment.id == id) {
+                return comment.replies || [];
+            } else if (comment.replies && comment.replies.length > 0) {
+                return getRepliesObject(comment.replies);
+            }
+            return [];
+        });
+    }
+
+    useEffect(() => {
+        setRepliess(getRepliesObject(comments));
+    }, [comments]);
+
     const handleToggleIsReplying = () => {
         setIsReplying((t) => !t);
     };
 
-    let replies;
-    if (comment.replies) {
-        replies = (
-            <ListComment replies={true}>
-                {comment.replies.map((comment) => {
-                    if (comment.user.username == currentUser.username) {
-                        return (
-                            <ActiveUserComment
-                                key={comment.id}
-                                comment={comment}
-                            />
-                        );
-                    }
-                    return <Comment key={comment.id} comment={comment} />;
-                })}
-            </ListComment>
-        );
+    function getReplies(comments) {
+        return comments.flatMap((comment) => {
+            if (comment.user.username == currentUser.username) {
+                return (
+                    <ActiveUserComment
+                        key={comment.id}
+                        id={comment.id}
+                        score={comment.score}
+                        content={comment.content}
+                        createdAt={comment.createdAt}
+                        username={comment.user.username}
+                        image={comment.user.image.png}
+                        replyingTo={comment.replyingTo}
+                    />
+                );
+            }
+            return (
+                <Comment
+                    key={comment.id}
+                    id={comment.id}
+                    score={comment.score}
+                    content={comment.content}
+                    createdAt={comment.createdAt}
+                    username={comment.user.username}
+                    image={comment.user.image.png}
+                    replyingTo={comment.replyingTo}
+                />
+            );
+        });
     }
 
-    let replyingTo;
-    if (comment.replyingTo) {
-        replyingTo = (
-            <span className="text-Moderate_blue font-medium">
-                @{comment.replyingTo}
-            </span>
-        );
-    }
+    let replies = getReplies(repliess);
 
     return (
         <li className="w-full list-none">
             <div
-                id={`comment-${comment.id}`}
+                id={`comment-${id}`}
                 className="w-full bg-white p-5 rounded-md grid grid-areas-layout sm:grid-cols-layout gap-x-4 gap-y-4 sm:grid-areas-sm_layout"
             >
                 <div className="grid-in-user flex items-center gap-3">
                     <span className="w-[40px] h-[40px] flex-shrink-0">
-                        <img
-                            src={comment.user.image.png}
-                            alt={comment.user.username}
-                            className="w-full"
-                        />
+                        <img src={image} alt={username} className="w-full" />
                     </span>
                     <div className="flex gap-x-3 items-center flex-wrap">
-                        <p className="text-Dark_blue font-medium">
-                            {comment.user.username}
-                        </p>
+                        <p className="text-Dark_blue font-medium">{username}</p>
                         <p className="text-Grayish_Blue">
-                            {<DateComponent date={comment.createdAt} />}
+                            {<DateComponent date={createdAt} />}
                         </p>
                     </div>
                 </div>
                 <div className="grid-in-content text-Grayish_Blue">
                     <p>
-                        {replyingTo} {comment.content}
+                        {replyingTo && (
+                            <span className="text-Moderate_blue font-medium">
+                                @{replyingTo}
+                            </span>
+                        )}{" "}
+                        {content}
                     </p>
                 </div>
                 <div className="grid-in-reply flex justify-end">
@@ -99,7 +129,7 @@ function Comment({ comment }) {
                 <div className="grid-in-react w-full sm:w-auto text-Moderate_blue font-medium">
                     <div className="flex sm:flex-col items-center justify-between py-2 sm:h-[90px] bg-Very_light_gray rounded-lg">
                         <button
-                            onClick={() => handleIncrementScore(comment.id)}
+                            onClick={() => handleIncrementScore(id)}
                             className="plus px-3 mr-2 sm:m-0 text-Light_grayish_blue hover:text-Moderate_blue"
                         >
                             <svg
@@ -112,9 +142,9 @@ function Comment({ comment }) {
                                 <path d="M6.33 10.896c.137 0 .255-.05.354-.149.1-.1.149-.217.149-.354V7.004h3.315c.136 0 .254-.05.354-.149.099-.1.148-.217.148-.354V5.272a.483.483 0 0 0-.148-.354.483.483 0 0 0-.354-.149H6.833V1.4a.483.483 0 0 0-.149-.354.483.483 0 0 0-.354-.149H4.915a.483.483 0 0 0-.354.149c-.1.1-.149.217-.149.354v3.37H1.08a.483.483 0 0 0-.354.15c-.1.099-.149.217-.149.353v1.23c0 .136.05.254.149.353.1.1.217.149.354.149h3.333v3.39c0 .136.05.254.15.353.098.1.216.149.353.149H6.33Z" />
                             </svg>
                         </button>
-                        {comment.score}
+                        {score}
                         <button
-                            onClick={() => handleDecrementScore(comment.id)}
+                            onClick={() => handleDecrementScore(id)}
                             className="minus px-3 ml-2 sm:m-0 text-Light_grayish_blue hover:text-Moderate_blue"
                         >
                             <svg
@@ -133,13 +163,13 @@ function Comment({ comment }) {
             {isReplying && (
                 <CommentForm
                     commentReply={true}
-                    commentId={comment.id}
+                    commentId={id}
                     onHandleToggleIsReplying={handleToggleIsReplying}
                 />
             )}
-            {replies}
+            {replies && <ListComment replies={true}>{replies}</ListComment>}
         </li>
     );
-}
+});
 
 export default Comment;
